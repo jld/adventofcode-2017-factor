@@ -1,4 +1,5 @@
-USING: kernel math math.functions math.order combinators ;
+USING: kernel math math.functions math.order combinators namespaces
+sequences assocs hashtables arrays fry ;
 IN: day03
 
 : >ring ( n -- n ) 0.5 - sqrt 1 + 2 / >integer ;
@@ -17,3 +18,22 @@ IN: day03
         { -1 [ 2drop 0 0 ] }
     } case ;
 : >manh ( n -- n ) >sqpoff nip abs + ;
+
+! Part 2 is... less elegant.
+SYMBOL: the-grid
+: with-grid ( ..a quot: ( ..a -- ..b ) -- ..b )
+    [ H{ } clone the-grid set call ] with-scope ; inline
+: grid@ ( x y -- n ) 2array the-grid get at* drop 0 or ;
+: grid! ( n x y -- ) 2array the-grid get set-at ;
+: grid-init ( -- ) 1 0 0 grid! ;
+: offset ( x y x' y' -- x'' y'' ) rot + [ + ] dip ;
+: neighborsum ( x y -- n )
+    '[ first2 _ _ offset grid@ + ] 0 swap
+    { { 1 0 } { 1 1 } { 0 1 } { -1 1 } { -1 0 } { -1 -1 } { 0 -1 } { 1 -1 } }
+    swap each ;
+: grid-advance ( x y -- n ) [ neighborsum dup ] [ grid! ] 2bi ;
+: grid-attain ( n -- n )
+    1 1 ! bound lastnum idx
+    [ [ 2dup < ] dip swap ] [ nip 1 + [ >coords grid-advance ] keep ] until
+    drop nip ;
+: part2 ( n -- n ) [ grid-init grid-attain ] with-grid ;
