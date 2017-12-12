@@ -23,7 +23,7 @@ IN: day03
 SYMBOL: the-grid
 : with-grid ( ..a quot: ( ..a -- ..b ) -- ..b )
     [ H{ } clone the-grid set call ] with-scope ; inline
-: grid@ ( x y -- n ) 2array the-grid get at* drop 0 or ;
+: grid@ ( x y -- n ) 2array the-grid get at 0 or ;
 : grid! ( n x y -- ) 2array the-grid get set-at ;
 : grid-init ( -- ) 1 0 0 grid! ;
 : offset ( x y x' y' -- x'' y'' ) rot + [ + ] dip ;
