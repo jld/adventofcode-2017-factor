@@ -19,3 +19,6 @@ SYMBOLS: *banks* *history* ;
 
 : scenario1 ( -- x ) 0 [ dup memorize ] [ 1 + redist ] until ;
 : part1 ( seq -- n ) [ scenario1 ] run-thing drop ;
+
+: scenario2 ( -- x ) 0 [ dup memorize dup ] [ drop 1 + redist ] until - ;
+: part2 ( seq -- n ) [ scenario2 ] run-thing drop ;
