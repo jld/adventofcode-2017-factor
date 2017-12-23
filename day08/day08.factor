@@ -1,4 +1,4 @@
-USING: kernel math math.parser combinators accessors fry
+USING: kernel math math.parser math.order combinators accessors fry
 strings splitting sequences arrays assocs hashtables
 io.files io.encodings.utf8 ;
 IN: day08
@@ -37,3 +37,7 @@ TUPLE: insn insn-dst insn-inc insn-psrc insn-pop insn-pimm ;
 : run1 ( insns -- regs ) H{ } clone [ '[ _ do-insn ] each ] keep ;
 : part1 ( insn -- n ) run1 values supremum ;
 
+: part2 ( insns -- n )
+    0 swap H{ } clone ! n insns regs
+    '[ _ 2dup do-insn
+       [ insn-dst>> ] dip at 0 or max ] each ;
