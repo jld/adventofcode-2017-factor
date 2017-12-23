@@ -2,7 +2,7 @@ USING: kernel math math.parser unicode sequences strings splitting make arrays
 io.files io.encodings.utf8 sets hash-sets assocs hashtables fry ;
 IN: day07
 
-: pnames ( str -- seq/f ) [ [ dup ] [ ", " split1 swap , ] while drop ] { } make ;
+: pnames ( str -- seq/f ) ", " split-subseq [ >string ] map ;
 : arrowthing ( str -- seq/f ) " -> " ?head [ pnames ] [ drop f ] if ;
 : pline ( str -- obj ) " (" split1 ")" split1 [ string>number ] dip arrowthing 3array ;
 
