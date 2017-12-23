@@ -1,4 +1,4 @@
-USING: kernel math sorting sequences arrays
+USING: kernel math sorting sequences arrays math.order
 hashtables assocs splitting strings
 io.files io.encodings.utf8 unicode ;
 IN: day11
@@ -29,3 +29,6 @@ CONSTANT: hexc-zero { 0 0 0 }
 : hexc-len ( h -- n ) dup hexc-excess neg hexc-addnull [ abs ] map sum ;
 
 : the-input ( -- s ) "inputs/day11" utf8 file-contents string>hexcs ;
+
+: hexc-scansum ( seq -- seq ) hexc-zero swap [ hexc-add dup ] map nip ;
+: hexc-farthest ( seq -- n ) [ hexc-len ] map 0 [ max ] reduce ;
