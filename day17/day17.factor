@@ -18,12 +18,40 @@ IN: day17
 : untwist ( sl -- seq ) dup 0 swap index <rotated> ;
 : bad-part2 ( n -- x ) 50000000 spinnings untwist second ;
 
-! So let's try something else.
+! So let's try something else.  (The stdlib has some balanced trees,
+! but they're all designed to be assocs, not indexed like this.  Sigh.)
 
-TUPLE: cordage elt left right length ;
+TUPLE: cordage elt left right length depth ;
 
 : length>>? ( co/f -- n ) [ length>> ] [ 0 ] if* ;
-: <cordage> ( elt left right -- co ) 2dup [ length>>? ] bi@ + 1 + cordage boa ;
+: depth>>? ( co/f -- n ) [ depth>> ] [ 0 ] if* ;
+: (<cordage>) ( elt left right -- co )
+    [ ]
+    [ [ length>>? ] bi@ + 1 + ]
+    [ [ depth>>? ] bi@ max 1 + ]
+    2tri cordage boa ;
+: uncord ( co -- elt left right ) [ elt>> ] [ left>> ] [ right>> ] tri ;
+! Almost but not quite entirely unlike AVL.  Such hax, very recursion,
+! wow.  (This isn't quite AVL because you can get a case with a single
+! large tree flanked by two small trees, where rotating at the root
+! won't change anything (and if the second constructions in the
+! rotation cases were recursive, they'd diverge).  I think that
+! wouldn't happen in real AVL because you're inserting in the interior
+! of the tree and fixing up the path back to the root.  Probably what
+! I really wanted here are splay trees, but if this hack works then
+! maybe I don't care?)
+: <cordage> ( elt left right -- co )
+    2dup [ depth>>? ] bi@ -
+    { { [ dup 1 > ] ! left is too big
+        [ drop [ uncord [ rot ] dip ] dip ! e1 t01 t2 -> e1 e0 t0 t1 t2 -> e0 t0 e1 t1 t2
+          <cordage> (<cordage>) ] }
+      { [ dup -1 < ] ! right is too big
+        [ drop uncord ! e0 t0 t12 -> e0 t0 e1 t1 t2 -> ...
+          [ swap [ <cordage> ] dip swap ] dip ! -> e0 t0 t1 e1 t2 -> t01 e1 t2 -> etc.
+          (<cordage>) ] } ! Ugh.  Maybe I should've used lexicals.
+      [ drop (<cordage>) ]
+    } cond ;
+
 : cord-take ( co n -- co' )
     { { [ dup 0 <= ] [ 2drop f ] }
       { [ over length>>? over <= ] [ drop ] }
@@ -47,9 +75,6 @@ TUPLE: cordage elt left right length ;
       tri append append
     ] [ { } ] if* ;
 
-! TODO: balancing?  Right now this will probably be O(n^2/k log n) or so,
-! where k is the input and n is large.
-
 TUPLE: vortex position state ;
 : <vortex> ( -- vo ) 0 0 f f <cordage> vortex boa ;
 : vortex-step ( n vo -- vo' )
@@ -66,5 +91,3 @@ TUPLE: vortex position state ;
     <vortex> -rot <iota> swap ! vo io n
     '[ 1 + _ rot vortex-iter ] each ;
 
-: cord-depth ( co -- n )
-    [ [ left>> cord-depth ] [ right>> cord-depth ] bi max 1 + ] [ 0 ] if* ;
