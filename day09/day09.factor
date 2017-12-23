@@ -17,4 +17,7 @@ CONSTANT: lbrace CHAR: { CONSTANT: rbrace CHAR: }
     ] { } make ;
 
 : the-input ( -- str ) "inputs/day09" utf8 file-contents ;
-: part1 ( str -- seq ) rinse scorify sum ;
+: part1 ( str -- n ) rinse scorify sum ;
+
+: garbages ( str -- seq ) R/ <([^>]*)>/ all-matching-slices [ length 2 - ] map ;
+: part2 ( str -- n ) cancelize garbages sum ;
