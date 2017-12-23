@@ -30,8 +30,9 @@ IN: day10
     '[ 16 * dup 16 + _ <slice> 0 [ bitxor ] reduce ]
     16 <iota> swap map ;
 
+: knothash ( str -- bytes ) keysched tangle densify ;
 : hexlate ( bytes -- str ) [ >hex 2 CHAR: 0 pad-head ] map concat ;
-: part2 ( str -- str ) keysched tangle densify hexlate ;
+: part2 ( str -- str ) knothash hexlate ;
 
 ! There's probably a better way to do test vectors, but:
 ""         part2 "a2582a3a0e66e6e86e3812dcb672a272" assert=
